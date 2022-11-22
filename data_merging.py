@@ -3,7 +3,7 @@
 import numpy as np
 import pandas as pd
 
-# Read in "base" Michigan CFE survey data
+# Read in "base" Michigan CSE survey data
 base_data = pd.read_csv("../paper_replication_data/MichiganConsumerSurvey.csv")
 
 # Read in Federal Funds Rate from FRED
@@ -30,5 +30,5 @@ spf = pd.read_excel("https://www.philadelphiafed.org/-/media/frbp/assets/surveys
 ##### Merge All Data Together
 other_data = [fed_funds, unemp, cpi, cpi_dur, case, spf]
 for i in other_data:
-    base_data.merge(i, how="left", on="Date")
+        base_data.merge(i, how="left", on="Date")
 
