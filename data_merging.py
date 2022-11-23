@@ -6,7 +6,7 @@ import mock
 from openpyxl.reader import excel
 
 # Read in "base" Michigan CFE survey data
-base_data = pd.read_csv("../paper_replication_data/MichiganConsumerSurvey.csv")
+base_data = pd.read_csv("../paper_replication_data/MichiganConsumerSurvey.csv",dtype=object)
 base_data["DATE"] = pd.to_datetime(base_data.YYYYMM, format="%Y%m").dt.strftime("%Y-%m-%d")
 
 # Read in Federal Funds Rate from FRED
@@ -47,3 +47,4 @@ spf = pd.merge(dates, spf, on=["YEAR", "QUARTER"], how="left").drop(columns=["YE
 other_data = [fed_funds, unemp, cpi, cpi_dur, case, spf]
 for i in other_data:
     base_data = base_data.merge(i, how="left", on="DATE")
+base_data["DATE"] = pd.to_datetime(base_data.DATE, format="%Y-%m-%d")
