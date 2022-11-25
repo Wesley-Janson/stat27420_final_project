@@ -4,6 +4,7 @@
 ## Imports
 import numpy as np
 import pandas as pd
+pd.options.mode.chained_assignment = None  # default='warn'
 import mock
 from openpyxl.reader import excel
 
@@ -139,23 +140,24 @@ base_data["DATE"] = pd.to_datetime(base_data.DATE, format="%Y-%m-%d")
 
 # initial preprocessing
 
+# drop columns we don't need
+data = base_data[list(var_renames.keys())+construction_vars]
+
 # first convert all to string, strip all, recode '' to np.nan
-base_data[list(var_renames.keys())+construction_vars] = base_data[
-    list(var_renames.keys())+construction_vars
-    ].astype(str).apply(lambda x: x.str.strip()
+data = data.astype(str).apply(lambda x: x.str.strip()
     ).replace('', np.nan).replace('nan', np.nan)
-base_data.rename(columns=var_renames,inplace=True)
+data.rename(columns=var_renames,inplace=True)
 
 # now recode categorical variables
-base_data["first_interview"] = np.where(base_data.prev_interview_id.isna(), 1, 0)
-base_data["price_related_yr_ago"] = np.where(
-    (base_data.PAGOR1.astype(str).isin(["14","54"]))|(base_data.PAGOR2.astype(str).isin(["14","54"])), 1, 0)
+data["first_interview"] = np.where(data.prev_interview_id.isna(), 1, 0)
+data["price_related_yr_ago"] = np.where(
+    (data.PAGOR1.astype(str).isin(["14","54"]))|(data.PAGOR2.astype(str).isin(["14","54"])), 1, 0)
 for var,codes in categorical_vars.items():
-    base_data[var] = base_data[var].astype(float).replace(categorical_vars[var])
+    data[var] = data[var].astype(float).replace(categorical_vars[var])
 
 # convert cts vars to numeric
-base_data["household_size"] = base_data.NUMKID.astype(float) + base_data.NUMADT.astype(float)
-base_data[cts_vars] = base_data[cts_vars].astype(float)
-base_data["price_change_amt_next_5yr"] = base_data.PX5Q2.replace([98,99], np.nan)
+data["household_size"] = data.NUMKID.astype(float) + data.NUMADT.astype(float)
+data[cts_vars] = data[cts_vars].astype(float)
+data["price_change_amt_next_5yr"] = data.price_change_amt_next_5yr.replace([98,99], np.nan)
 
-base_data = base_data.drop(columns=construction_vars)
+data = data.drop(columns=construction_vars)
