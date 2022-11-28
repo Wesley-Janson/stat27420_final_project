@@ -85,12 +85,12 @@ for i in data.date.unique():
 
 data["treatment_pctile"] = pd.cut(data['pctiles'],
                       bins=[0.0, 0.2, 0.4, 0.6, 0.8, float('Inf')],
-                      labels=[0, 1, 2, 3, 4])
+                      labels=[1, 2, 3, 4, 5])
 data.drop(columns=['pctiles'])
 
 data["treatment_bins"] = pd.cut(data['price_change_amt_next_yr'],
                       bins=[0, 5, 10, 15, 20, float('Inf')],
-                      labels=[0, 1, 2, 3, 4])
+                      labels=[1, 2, 3, 4, 5])
 
 data = data.drop(columns=construction_vars)
 categorical_vars = list(categorical_vars.keys())
