@@ -6,8 +6,14 @@ from parameters import cts_vars, categorical_vars, other_vars, confounder_vars
 
 categorical_vars = list(categorical_vars.keys())
 
+
 def read_data(data_path):
-    data = pd.read_csv(data_path)
+    data = pd.read_csv(data_path,dtype=object)
+    # now convert types:
+    data[cts_vars] = data[cts_vars].astype(float)
+    data[categorical_vars] = data[categorical_vars].astype(str).replace('nan', np.nan)
+    data[other_vars] = data[other_vars].astype(str)
+    data["date"] = pd.to_datetime(data.date, format="%Y-%m-%d")
     return data
 
 
