@@ -66,13 +66,6 @@ data = data.astype(str).apply(lambda x: x.str.strip()
     ).replace('', np.nan).replace('nan', np.nan)
 data.rename(columns=var_renames,inplace=True)
 
-# now recode categorical variables
-data["first_interview"] = np.where(data.prev_interview_id.isna(), 1, 0)
-data["price_related_yr_ago"] = np.where(
-    (data.PAGOR1.astype(str).isin(["14","54"]))|(data.PAGOR2.astype(str).isin(["14","54"])), 1, 0)
-for var,codes in categorical_vars.items():
-    data[var] = data[var].astype(float).replace(categorical_vars[var])
-
 # convert cts vars to numeric
 data["household_size"] = data.NUMKID.astype(float) + data.NUMADT.astype(float)
 data[cts_vars] = data[cts_vars].astype(float)
@@ -91,6 +84,13 @@ data.drop(columns=['pctiles'])
 data["treatment_bins"] = pd.cut(data['price_change_amt_next_yr'],
                       bins=[0, 5, 10, 15, 20, float('Inf')],
                       labels=[1, 2, 3, 4, 5])
+
+# now recode categorical variables
+data["first_interview"] = np.where(data.prev_interview_id.isna(), 1, 0)
+data["price_related_yr_ago"] = np.where(
+    (data.PAGOR1.astype(str).isin(["14","54"]))|(data.PAGOR2.astype(str).isin(["14","54"])), 1, 0)
+for var,codes in categorical_vars.items():
+    data[var] = data[var].astype(float).replace(categorical_vars[var])
 
 data = data.drop(columns=construction_vars)
 categorical_vars = list(categorical_vars.keys())
