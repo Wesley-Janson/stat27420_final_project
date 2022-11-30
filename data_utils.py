@@ -2,13 +2,14 @@ import numpy as np
 import pandas as pd
 pd.options.mode.chained_assignment = None  # default='warn'
 from sklearn.preprocessing import StandardScaler, OneHotEncoder
-from parameters import cts_vars, categorical_vars, other_vars
+from parameters import cts_vars, categorical_vars, other_vars, confounder_vars
+
 categorical_vars = list(categorical_vars.keys())
 
 
 def prep_features(
     data, regression=False, cts_vars=cts_vars, categorical_vars=categorical_vars,
-    confounders):
+    confounders=confounder_vars):
 
     # outcome var -> cts if regression
     if regression: 
@@ -23,4 +24,12 @@ def prep_features(
     # one-hot encode categorical variables, dropping first iff regression is True
     data = pd.get_dummies(data, columns=categorical_vars, drop_first=regression)
 
-    return data, treatment, confounders
+    # prepare treatment and confounder var lists with dummies
+    treatment_vars = [var for var in data.columns if 'bins' in var]
+    confounder_vars = []
+    for var in confounders:
+        for dummy in data.columns:
+            if var in dummy:
+                confounder_vars.append(dummy)
+
+    return data, treatment_vars, confounder_vars

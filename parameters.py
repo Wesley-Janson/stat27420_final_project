@@ -88,7 +88,7 @@ cts_vars = [
 other_vars = ["date", "case_id", "interview_id", "prev_interview_id", "prev_interview_date"]
 construction_vars = ["PAGOR1", "PAGOR2", "NUMKID", "NUMADT"]
 
-confounders = [
+confounder_vars = [
     "fed_funds_rate",
     "unemployment_rate",
     "cpi_1mo_lag",
