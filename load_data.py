@@ -58,6 +58,7 @@ for i in other_data:
     base_data = base_data.merge(i, how="left", on="DATE")
 base_data["DATE"] = pd.to_datetime(base_data.DATE, format="%Y-%m-%d")
 
+
 ## Initial preprocessing
 
 # drop columns we don't need
@@ -71,18 +72,23 @@ data.rename(columns=var_renames,inplace=True)
 # convert cts vars to numeric
 data["household_size"] = data.NUMKID.astype(float) + data.NUMADT.astype(float)
 data[cts_vars] = data[cts_vars].astype(float)
-data["price_change_amt_next_5yr"] = data.price_change_amt_next_5yr.replace([98,99], np.nan)
+print(f'Excluding {len(data[(data.price_change_next_yr!="8")&(data.price_change_next_yr!="9")])} observations that did not answer 1 year price change question.')
+data = data[(data.price_change_next_yr!="8")&(data.price_change_next_yr!="9")]
+data[["price_change_amt_next_yr","price_change_amt_next_5yr"]] = data[[
+    "price_change_amt_next_yr","price_change_amt_next_5yr"]].fillna(0)
+data["price_change_amt_next_yr"] = data.price_change_amt_next_yr.replace(
+    to_replace={98:np.nan,99:0})  # 98 = don't know, 99 = NA
+data["price_change_amt_next_5yr"] = data.price_change_amt_next_5yr.replace(
+    to_replace={98:np.nan,99:0})  # 98 = don't know, 99 = NA)
 
-# Create two different treatment variables
+# create two different treatment variables
 data['pctiles'] = np.nan
 for i in data.date.unique():
     data['pctiles'] = np.where(data['date']==i, data.price_change_amt_next_yr.rank(pct = True), data['pctiles']) 
-
 data["treatment_pctile"] = pd.cut(data['pctiles'],
                       bins=[0.0, 0.2, 0.4, 0.6, 0.8, float('Inf')],
                       labels=[1, 2, 3, 4, 5])
 data.drop(columns=['pctiles'])
-
 data["treatment_bins"] = pd.cut(data['price_change_amt_next_yr'],
                       bins=[0, 5, 10, 15, 20, float('Inf')],
                       labels=[1, 2, 3, 4, 5])
