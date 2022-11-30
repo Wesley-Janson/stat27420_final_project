@@ -8,7 +8,9 @@ var_renames = {
     'FEDFUNDS': 'fed_funds_rate',
     'UNRATE': 'unemployment_rate',
     'CPIAUCSL': 'cpi',
+    "CPIAUCSL_1mo_lag": "cpi_1mo_lag",
     'CUSR0000SAD': 'cpi_durable',
+    'CUSR0000SAD_1mo_lag': 'cpi_durable_1mo_lag',
     'SPCS10RSA': 'home_price_index',
     'INFPGDP1YR': '1yr_inflation_via_gdp',
     'INFCPI1YR': '1yr_inflation_via_cpi',
@@ -79,9 +81,26 @@ cts_vars = [
     "consumer_sentiment_index","economic_conditions_index","consumer_expectations_index",
     "income_change_amt_next_yr","price_change_amt_next_yr","price_change_amt_next_5yr",
     "age","household_size", "n_cars", "real_income_increase_chance_next_5yr",'fed_funds_rate',
-    'unemployment_rate','cpi','cpi_durable','home_price_index','1yr_inflation_via_gdp',
-    '1yr_inflation_via_cpi','10yr_inflation_via_cpi'
+    'unemployment_rate','cpi','cpi_1mo_lag','cpi_durable','cpi_durable_1mo_lag','home_price_index',
+    '1yr_inflation_via_gdp','1yr_inflation_via_cpi','10yr_inflation_via_cpi'
     ]
 
 other_vars = ["date", "case_id", "interview_id", "prev_interview_id", "prev_interview_date"]
 construction_vars = ["PAGOR1", "PAGOR2", "NUMKID", "NUMADT"]
+
+confounders = [
+    "fed_funds_rate",
+    "unemployment_rate",
+    "cpi_1mo_lag",
+    "cpi_durable_1mo_lag",
+    "personal_finances_next_yr",
+    "income_change_amt_next_yr",
+    "conditions_next_yr",
+    "unemployment_next_yr",
+    "income_quintile",
+    "age",
+    "sex",
+    "education",
+    "household_size",
+    "price_related_yr_ago"
+]

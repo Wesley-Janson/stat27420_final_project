@@ -7,7 +7,8 @@ categorical_vars = list(categorical_vars.keys())
 
 
 def prep_features(
-    data, regression=False, cts_vars=cts_vars, categorical_vars=categorical_vars):
+    data, regression=False, cts_vars=cts_vars, categorical_vars=categorical_vars,
+    confounders):
 
     # outcome var -> cts if regression
     if regression: 
@@ -22,4 +23,4 @@ def prep_features(
     # one-hot encode categorical variables, dropping first iff regression is True
     data = pd.get_dummies(data, columns=categorical_vars, drop_first=regression)
 
-    return data
+    return data, treatment, confounders

@@ -25,10 +25,12 @@ unemp = pd.read_csv("https://fred.stlouisfed.org/graph/fredgraph.csv?bgcolor=%23
 # Read in Headline CPI from BLS via FRED
 cpi = pd.read_csv("https://fred.stlouisfed.org/graph/fredgraph.csv?bgcolor=%23e1e9f0&chart_type=line&drp=0&fo=open%20sans&graph_bgcolor=%23ffffff&height=450&mode=fred&recession_bars=on&txtcolor=%23444444&ts=12&tts=12&width=1168&nt=0&thu=0&trc=0&show_legend=yes&show_axis_titles=yes&show_tooltip=yes&id=CPIAUCSL&scale=le")
 cpi["CPIAUCSL"] = pd.Series(cpi["CPIAUCSL"]).pct_change(12)*100
+cpi["CPIAUCSL_1mo_lag"] = cpi["CPIAUCSL"].shift(1)
 
 # Read in CPI Durable Goods from BLS via FRED
 cpi_dur = pd.read_csv("https://fred.stlouisfed.org/graph/fredgraph.csv?bgcolor=%23e1e9f0&chart_type=line&drp=0&fo=open%20sans&graph_bgcolor=%23ffffff&height=450&mode=fred&recession_bars=on&txtcolor=%23444444&ts=12&tts=12&width=1168&nt=0&thu=0&trc=0&show_legend=yes&show_axis_titles=yes&show_tooltip=yes&id=CUSR0000SAD&scale")
 cpi_dur["CUSR0000SAD"] = pd.Series(cpi_dur["CUSR0000SAD"]).pct_change(12)*100
+cpi_dur["CUSR0000SAD_1mo_lag"] = cpi_dur["CUSR0000SAD"].shift(1)
 
 # Read in Case-Shiller Index from FRED
 case = pd.read_csv("https://fred.stlouisfed.org/graph/fredgraph.csv?bgcolor=%23e1e9f0&chart_type=line&drp=0&fo=open%20sans&graph_bgcolor=%23ffffff&height=450&mode=fred&recession_bars=on&txtcolor=%23444444&ts=12&tts=12&width=1168&nt=0&thu=0&trc=0&show_legend=yes&show_axis_titles=yes&show_tooltip=yes&id=SPCS10RSA&scale=l")
