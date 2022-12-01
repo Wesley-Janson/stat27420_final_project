@@ -90,7 +90,7 @@ data["treatment_pctile"] = pd.cut(data['pctiles'],
                       labels=[1, 2, 3, 4, 5])
 data.drop(columns=['pctiles'])
 data["treatment_bins"] = pd.cut(data['price_change_amt_next_yr'],
-                      bins=[0, 5, 10, 15, 20, float('Inf')],
+                      bins=[-0.000001, 5, 10, 15, 20, float('Inf')],
                       labels=[1, 2, 3, 4, 5])
 
 # now recode categorical variables
