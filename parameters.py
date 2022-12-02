@@ -52,6 +52,7 @@ var_renames = {
 
 categorical_vars = {
     "first_interview": {},
+    "zlb": {},
     "personal_finances_yr_ago": {1: "Better", 3: "Same", 5: "Worse", 8: "Don't know", 9: "Refused"},
     "price_related_yr_ago": {},
     "personal_finances_5yr_ago": {1: "Better", 3: "Same", 5: "Worse", 8: "Don't know", 9: "Refused"},
@@ -102,5 +103,6 @@ confounder_vars = [
     "sex",
     "education",
     "household_size",
-    "price_related_yr_ago"
+    "price_related_yr_ago",
+    "zlb"
 ]

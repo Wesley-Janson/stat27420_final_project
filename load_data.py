@@ -94,7 +94,7 @@ data["treatment_bins"] = pd.cut(data['price_change_amt_next_yr'],
                       labels=[1, 2, 3, 4, 5])
 
 # Create ZLB Variable
-data["zlb"] = np.where(data.FEDFUNDS < 0.25, 1, 0)
+data["zlb"] = np.where(data.fed_funds_rate < 0.25, 1, 0)
 
 # now recode categorical variables
 data["first_interview"] = np.where(data.prev_interview_id.isna(), 1, 0)
