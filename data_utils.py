@@ -18,8 +18,8 @@ def read_data(data_path):
 
 
 def prep_features(
-    data, regression=False, cts_vars=cts_vars, categorical_vars=categorical_vars,
-    confounders=confounder_vars):
+    data, regression=False, impute=False,
+    cts_vars=cts_vars, categorical_vars=categorical_vars, confounders=confounder_vars):
 
     # prep outcome
     data['durable_purchase']=data['durable_purchase'].replace(to_replace={
@@ -32,7 +32,7 @@ def prep_features(
     categorical_vars = [var for var in categorical_vars if var != 'durable_purchase']
 
     # handle regression vs. classification differences
-    if regression: 
+    if regression or not impute: 
         temp = len(data)
         data = data.dropna(subset=confounders)
         print(f'Excluding {temp-len(data)} observations that did not answer confounder questions.')
