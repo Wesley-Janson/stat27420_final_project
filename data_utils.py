@@ -27,6 +27,8 @@ def prep_features(
             'Good':1,'Neutral':0,'Bad':-1,"Don't know":np.nan,"Refused":np.nan})
         print(f'Excluding {len(data[data.durable_purchase.isnull()])} observations that did not answer durable purchase question.')
         data = data[data.durable_purchase.notnull()]  # require outcome
+        data["durable_purchase"] = np.where(data.durable_purchase==1, 2, 
+            np.where(data.durable_purchase==0,1,0))
         data = data.dropna(subset=['durable_purchase'])
         categorical_vars = [var for var in categorical_vars if var != 'durable_purchase']
     
