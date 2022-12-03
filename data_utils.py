@@ -26,13 +26,18 @@ def prep_features(
         data['durable_purchase']=data['durable_purchase'].replace(to_replace={
             'Good':1,'Neutral':0,'Bad':-1,"Don't know":np.nan,"Refused":np.nan})
         print(f'Excluding {len(data[data.durable_purchase.isnull()])} observations' +
-            ' that did not answer durable purchase question.')
+            " that refused or didn't know durable purchase question.")
         data = data[data.durable_purchase.notnull()]  # require outcome
-        data = data.dropna(subset=['durable_purchase'])
         categorical_vars = [var for var in categorical_vars if var != 'durable_purchase']
         temp = len(data)
         data = data.dropna(subset=confounders)
         print(f'Excluding {temp-len(data)} observations that did not answer confounder questions.')
+    else:
+        data['durable_purchase']=data['durable_purchase'].replace(to_replace={
+            'Good':2,'Neutral':1,'Bad':0,"Don't know":3,"Refused":np.nan})
+        print(f'Excluding {len(data[data.durable_purchase.isnull()])} observations' +
+            ' that refused durable purchase question.')
+        data = data[data.durable_purchase.notnull()]  # require outcome
     
     # normalize cts variables
     data[cts_vars] = StandardScaler().fit_transform(data[cts_vars])
