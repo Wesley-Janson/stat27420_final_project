@@ -69,4 +69,5 @@ def prep_features(
             if var in dummy:
                 confounder_vars.append(dummy)
 
-    return data[other_vars+confounder_vars+treatment_vars+["durable_purchase"]], treatment_vars, confounder_vars
+    return data[other_vars+confounder_vars+treatment_vars+[
+        "price_change_amt_next_yr","durable_purchase"]], treatment_vars, confounder_vars
