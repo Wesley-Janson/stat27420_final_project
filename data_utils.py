@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 pd.options.mode.chained_assignment = None  # default='warn'
 from sklearn.preprocessing import StandardScaler, OneHotEncoder
+from sklearn.impute import KNNImputer
 from parameters import cts_vars, categorical_vars, other_vars, confounder_vars
 
 categorical_vars = list(categorical_vars.keys())
@@ -18,7 +19,7 @@ def read_data(data_path):
 
 
 def prep_features(
-    data, regression=False, impute=False,
+    data, regression=False, missing_values='retain',
     cts_vars=cts_vars, categorical_vars=categorical_vars, confounders=confounder_vars):
 
     # prep outcome
@@ -30,19 +31,25 @@ def prep_features(
         " that refused or didn't know durable purchase question.")
     data = data[data.durable_purchase.notnull()]  # require outcome
     categorical_vars = [var for var in categorical_vars if var != 'durable_purchase']
+    if not regression:
+        data["durable_purchase"] += 1  # code as {0,1,2} for XGBoost
 
-    # handle regression vs. classification differences
-    if regression or not impute: 
+
+    # handle missing values
+    if missing_values == 'drop':  # xgboost can handle missing values, others mostly just drop them
         temp = len(data)
         data = data.dropna(subset=confounders)
         print(f'Excluding {temp-len(data)} observations that did not answer confounder questions.')
-    else:
-        data["durable_purchase"] += 1  # code as {0,1,2} for XGBoost
+    elif missing_values == 'impute by median':  # fast but not great
         for var in cts_vars:
             if data[var].isnull().sum()>0 and var in confounders:
                 print(f'Imputing {data[var].isnull().sum()} missing values for {var} with median.')
                 data[var+'_imputed'] = data[var].isnull().astype(int)
                 data[var] = data[var].fillna(data[var].median())
+    elif missing_values == 'impute by knn':  # very slow
+        print(f'Imputing missing values via KNN.')
+        imputer = KNNImputer(n_neighbors=5)
+        data[cts_vars] = imputer.fit_transform(data[cts_vars])
     
     # prep cts variables
     data[cts_vars] = StandardScaler().fit_transform(data[cts_vars])
