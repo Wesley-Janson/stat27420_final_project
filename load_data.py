@@ -8,7 +8,8 @@ pd.options.mode.chained_assignment = None  # default='warn'
 import mock
 from openpyxl.reader import excel
 from parameters import var_renames, categorical_vars, cts_vars, other_vars, construction_vars
-
+import warnings
+warnings.filterwarnings('ignore')
 
 ## Load and merge data
 
@@ -72,7 +73,8 @@ data.rename(columns=var_renames,inplace=True)
 # convert cts vars to numeric
 data["household_size"] = data.NUMKID.astype(float) + data.NUMADT.astype(float)
 data[cts_vars] = data[cts_vars].astype(float)
-print(f'Excluding {len(data[(data.price_change_next_yr!="8")&(data.price_change_next_yr!="9")])} observations that did not answer 1 year price change question.')
+print(f'Excluding {len(data[(data.price_change_next_yr=="8")&(data.price_change_next_yr=="9")])}'+
+    ' observations that did not answer 1 year price change question.')
 data = data[(data.price_change_next_yr!="8")&(data.price_change_next_yr!="9")]
 data[["price_change_amt_next_yr","price_change_amt_next_5yr"]] = data[[
     "price_change_amt_next_yr","price_change_amt_next_5yr"]].fillna(0)
