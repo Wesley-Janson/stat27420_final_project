@@ -3,6 +3,7 @@ import pandas as pd
 pd.options.mode.chained_assignment = None  # default='warn'
 from sklearn.preprocessing import StandardScaler, OneHotEncoder
 from sklearn.impute import KNNImputer
+from sklearn.metrics import accuracy_score
 from parameters import cts_vars, categorical_vars, other_vars, confounder_vars
 
 categorical_vars = list(categorical_vars.keys())
@@ -33,7 +34,6 @@ def prep_features(
     categorical_vars = [var for var in categorical_vars if var != 'durable_purchase']
     if not regression:
         data["durable_purchase"] += 1  # code as {0,1,2} for XGBoost
-
 
     # handle missing values
     if missing_values == 'drop':  # xgboost can handle missing values, others mostly just drop them
@@ -71,3 +71,15 @@ def prep_features(
 
     return data[other_vars+confounder_vars+treatment_vars+[
         "price_change_amt_next_yr","durable_purchase"]], treatment_vars, confounder_vars
+
+
+def evaluate_predictions(model, X_train, X_test, y_train, y_test):
+    y_pred = model.predict(X_test)
+    y_pred_train = model.predict(X_train)
+    test_predictions = [round(value) for value in y_pred]
+    train_predictions = [round(value) for value in y_pred_train]
+    print("Baseline accuracy: %.2f%%" % (y_test.value_counts(normalize=True).max()*100))
+    print("Train accuracy: %.2f%%" % (accuracy_score(y_pred_train, train_predictions) * 100.0))
+    print("Test accuracy: %.2f%%" % (accuracy_score(y_test, test_predictions) * 100.0))
+    print('\nTest predictions vs actual:')
+    return pd.DataFrame({'actual': y_test, 'predicted': test_predictions}).groupby(['actual','predicted']).size()
