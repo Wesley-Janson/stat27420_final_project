@@ -77,10 +77,10 @@ def evaluate_predictions(model, X_train, X_test, y_train, y_test, regression = F
     y_pred = model.predict(X_test)
     y_pred_train = model.predict(X_train)
     if regression:
-        y_pred['class'] = y_pred.idxmax(axis=1)
-        y_pred = y_pred['class']
-        y_pred_train['class'] = y_pred_train.idxmax(axis=1)
-        y_pred_train = y_pred_train['class']
+        y_pred['class'] = y_pred.idxmax(axis=1)-1
+        test_predictions = y_pred['class']
+        y_pred_train['class'] = y_pred_train.idxmax(axis=1)-1
+        train_predictions = y_pred_train['class']
     else:
         test_predictions = [round(value) for value in y_pred]
         train_predictions = [round(value) for value in y_pred_train]
