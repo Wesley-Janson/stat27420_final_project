@@ -22,6 +22,8 @@ def read_data(data_path):
 def prep_features(
     data, regression=False, missing_values='retain',
     cts_vars=cts_vars, categorical_vars=categorical_vars, confounders=confounder_vars):
+    """missing_values options: 'retain all', 'retain cts', 'impute by knn', 'impute by median',
+        'drop cts', 'drop all'"""
 
     # prep outcome
     data['durable_purchase']=data['durable_purchase'].replace(to_replace={
@@ -34,9 +36,11 @@ def prep_features(
     categorical_vars = [var for var in categorical_vars if var != 'durable_purchase']
     if not regression:
         data["durable_purchase"] += 1  # code as {0,1,2} for XGBoost
+        data["durable_purchase"] = data["durable_purchase"].astype(int)
 
     # handle missing values
-    if missing_values == 'drop':  # xgboost can handle missing values, others mostly just drop them
+    # xgboost can handle missing values, others mostly just drop them
+    if missing_values == 'drop cts' or missing_values == 'drop all': 
         temp = len(data)
         data = data.dropna(subset=confounders)
         print(f'Excluding {temp-len(data)} observations that did not answer confounder questions.')
@@ -55,7 +59,12 @@ def prep_features(
     data[cts_vars] = StandardScaler().fit_transform(data[cts_vars])
 
     # one-hot encode categorical variables, dropping first iff regression is True
-    data[categorical_vars] = data[categorical_vars].fillna('Missing')  # new class for missing
+    if missing_values == 'drop all':
+        temp = len(data)
+        data[categorical_vars] = data[categorical_vars].dropna()
+        print(f'Excluding {temp-len(data)} observations that did not answer confounder questions.')
+    elif missing_values != 'retain all':
+        data[categorical_vars] = data[categorical_vars].fillna('Missing')  # new class for missing
     data = pd.get_dummies(data, columns=categorical_vars, drop_first=regression)
 
     # prepare treatment and confounder var lists with dummies
@@ -73,6 +82,20 @@ def prep_features(
         "price_change_amt_next_yr","durable_purchase"]], treatment_vars, confounder_vars
 
 
+def summarize_predictions(y_train, train_predictions, y_test, test_predictions):
+    print("Baseline accuracy: %.2f%%" % (y_test.value_counts(normalize=True).max()*100))
+    print("Train accuracy: %.2f%%" % (accuracy_score(y_train, train_predictions) * 100.0))
+    print("Test accuracy: %.2f%%" % (accuracy_score(y_test, test_predictions) * 100.0))
+    print('\nTest predictions vs actual:')
+    if type(y_test) == list:
+        y_test = y_test.rename('actual').reset_index()
+        test_predictions = test_predictions.rename('predicted').reset_index()
+    except:  # they're lists
+        pass
+    return pd.concat([y_test, test_predictions],axis=1
+    ).groupby(['actual','predicted']).size()
+
+
 def evaluate_predictions(model, X_train, X_test, y_train, y_test, regression = False):
     y_pred = model.predict(X_test)
     y_pred_train = model.predict(X_train)
@@ -84,8 +107,40 @@ def evaluate_predictions(model, X_train, X_test, y_train, y_test, regression = F
     else:
         test_predictions = [round(value) for value in y_pred]
         train_predictions = [round(value) for value in y_pred_train]
-    print("Baseline accuracy: %.2f%%" % (y_test.value_counts(normalize=True).max()*100))
-    print("Train accuracy: %.2f%%" % (accuracy_score(y_train, train_predictions) * 100.0))
-    print("Test accuracy: %.2f%%" % (accuracy_score(y_test, test_predictions) * 100.0))
-    print('\nTest predictions vs actual:')
-    return pd.DataFrame({'actual': y_test, 'predicted': test_predictions}).groupby(['actual','predicted']).size()
+    return summarize_predictions(y_train, train_predictions, y_test, test_predictions)
+
+
+def rebin_outcome(data):
+    if data['durable_purchase'].min() == -1:
+        regression = True
+        data['durable_purchase'] += 1
+    else:
+        regression = False
+    data['durable_good'] = np.where(data['durable_purchase']==2,1,0)
+    data['durable_bad'] = np.where(data['durable_purchase']==0,1,0)
+    if regression:
+        data['durable_purchase'] -= 1
+    return data
+
+
+def unrebin_outcome(ya_pred,yb_pred):
+    predictions = pd.DataFrame(data={'isgood':ya_pred,'isbad':yb_pred})
+    predictions["durable_purchase"] = np.where(
+        (predictions["isgood"] == 0) & (predictions["isbad"] == 1), 0, -1)
+    predictions["durable_purchase"] = np.where(
+        (predictions["isgood"] == 0) & (predictions["isbad"] == 0), 1, predictions["durable_purchase"])
+    predictions["durable_purchase"] = np.where(
+        (predictions["isgood"] == 1) & (predictions["isbad"] == 0), 2, predictions["durable_purchase"])
+    return predictions.durable_purchase
+
+
+def evaluate_multilevel_predictions(modela, modelb, X_train, X_test, y_train, y_test):
+    ya_pred = modela.predict(X_test)
+    yb_pred = modelb.predict(X_test)
+    ya_pred_train = modela.predict(X_train)
+    yb_pred_train = modelb.predict(X_train)
+    test_predictions = unrebin_outcome(ya_pred,yb_pred)
+    train_predictions = unrebin_outcome(ya_pred_train,yb_pred_train)
+    return(summarize_predictions(
+        y_train.durable_purchase, train_predictions, 
+        y_test.durable_purchase, test_predictions))
