@@ -88,10 +88,10 @@ def summarize_predictions(y_train, train_predictions, y_test, test_predictions):
     print("Test accuracy: %.2f%%" % (accuracy_score(y_test, test_predictions) * 100.0))
     print('\nTest predictions vs actual:')
     if type(y_test) == list:
-        y_test = y_test.rename('actual').reset_index()
-        test_predictions = test_predictions.rename('predicted').reset_index()
-    except:  # they're lists
-        pass
+        y_test = pd.Series(y_test)
+        test_predictions = pd.Series(test_predictions)
+    y_test = y_test.rename('actual').reset_index()
+    test_predictions = test_predictions.rename('predicted').reset_index()
     return pd.concat([y_test, test_predictions],axis=1
     ).groupby(['actual','predicted']).size()
 
