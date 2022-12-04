@@ -9,6 +9,7 @@ import mock
 from openpyxl.reader import excel
 from parameters import var_renames, categorical_vars, cts_vars, other_vars, construction_vars
 import warnings
+import datetime as dt
 warnings.filterwarnings('ignore')
 
 ## Load and merge data
@@ -58,6 +59,9 @@ other_data = [fed_funds, unemp, cpi, cpi_dur, case, spf]
 for i in other_data:
     base_data = base_data.merge(i, how="left", on="DATE")
 base_data["DATE"] = pd.to_datetime(base_data.DATE, format="%Y-%m-%d")
+
+# Drop pre-1984 data
+base_data = base_data[(base_data["DATE"].dt.date >= dt.date(1984,1,1))]
 
 
 ## Initial preprocessing
