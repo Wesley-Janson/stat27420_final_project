@@ -16,6 +16,7 @@ def read_data(data_path):
     data[categorical_vars] = data[categorical_vars].astype(str).replace('nan', np.nan)
     data[other_vars] = data[other_vars].astype(str)
     data["date"] = pd.to_datetime(data.date, format="%Y-%m-%d")
+    data['treatment_bins'] = data.treatment_bins.astype(float)
     return data
 
 
@@ -65,11 +66,9 @@ def prep_features(
         print(f'Excluding {temp-len(data)} observations that did not answer confounder questions.')
     elif missing_values != 'retain all':
         data[categorical_vars] = data[categorical_vars].fillna('Missing')  # new class for missing
-    
-    data_treatment_bins = data[data.price_change_amt_next_yr.notnull()]
-    data_treatment_bins = data_treatment_bins["treatment_bins"]
-    
-    data = pd.get_dummies(data, columns=categorical_vars, drop_first=regression)
+        
+    data = pd.concat(
+        [pd.get_dummies(data, columns=categorical_vars, drop_first=regression),data["treatment_bins"]],axis=1)
 
     # prepare treatment and confounder var lists with dummies
     print(f'Excluding {len(data[data.price_change_amt_next_yr.isnull()])} observations' +
@@ -82,15 +81,9 @@ def prep_features(
             if var in dummy:
                 confounder_vars.append(dummy)
 
-    int_data = data[other_vars+confounder_vars+treatment_vars+[
-        "price_change_amt_next_yr","durable_purchase"]]
-    int_data["treatment_bins"] = data_treatment_bins
-    int_data["treatment_bins"] = np.where(int_data["treatment_bins"]=="0-5",0,
-                                        np.where(int_data["treatment_bins"]=="5-10",1,
-                                        np.where(int_data["treatment_bins"]=="10-15",2,
-                                        np.where(int_data["treatment_bins"]=="15-20",3,4))))
-
-    return int_data, treatment_vars, confounder_vars
+    return data[
+        other_vars+confounder_vars+treatment_vars+["price_change_amt_next_yr","durable_purchase"]
+        ].reset_index(), treatment_vars, confounder_vars
 
 
 def summarize_predictions(y_train, train_predictions, y_test, test_predictions):

@@ -75,7 +75,7 @@ categorical_vars = {
     "education": {1: "No high school", 2: "Partial high school", 3: "High school", 4: "Some college", 5: "College", 6: "Graduate school"},
     "vehicle_ownership": {1: "Yes", 5: "No", 8: "Don't know", 9: "Refused"},
     "treatment_pctile": {1: "Lowest Group", 2: "Low Group", 3: "On Target", 4: "High Group", 5: "Highest Group"},
-    "treatment_bins": {1: "0-5", 2: "5-10", 3: "10-15", 4: "15-20", 5: "20+"}
+    "treatment_bins": {}  # 1: "0-5", 2: "5-10", 3: "10-15", 4: "15-20", 5: "20+"
     }
 
 cts_vars = [
