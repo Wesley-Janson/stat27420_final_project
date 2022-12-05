@@ -93,11 +93,11 @@ for i in data.date.unique():
     data['pctiles'] = np.where(data['date']==i, data.price_change_amt_next_yr.rank(pct = True), data['pctiles']) 
 data["treatment_pctile"] = pd.cut(data['pctiles'],
                       bins=[0.0, 0.2, 0.4, 0.6, 0.8, float('Inf')],
-                      labels=[1, 2, 3, 4, 5])
+                      labels=[0, 1, 2, 3, 4])
 data.drop(columns=['pctiles'])
 data["treatment_bins"] = pd.cut(data['price_change_amt_next_yr'],
                       bins=[-0.000001, 5, 10, 15, 20, float('Inf')],
-                      labels=[1, 2, 3, 4, 5])
+                      labels=[0, 1, 2, 3, 4])
 
 # Create ZLB Variable
 data["zlb"] = np.where(data.fed_funds_rate < 0.25, 1, 0)

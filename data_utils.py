@@ -69,8 +69,6 @@ def prep_features(
     data_treatment_bins = data[data.price_change_amt_next_yr.notnull()]
     data_treatment_bins = data_treatment_bins["treatment_bins"]
     
-
-    #data_treatment_bins = data["treatment_bins"]
     data = pd.get_dummies(data, columns=categorical_vars, drop_first=regression)
 
     # prepare treatment and confounder var lists with dummies
@@ -87,6 +85,10 @@ def prep_features(
     int_data = data[other_vars+confounder_vars+treatment_vars+[
         "price_change_amt_next_yr","durable_purchase"]]
     int_data["treatment_bins"] = data_treatment_bins
+    int_data["treatment_bins"] = np.where(int_data["treatment_bins"]=="0-5",0,
+                                        np.where(int_data["treatment_bins"]=="5-10",1,
+                                        np.where(int_data["treatment_bins"]=="10-15",2,
+                                        np.where(int_data["treatment_bins"]=="15-20",3,4))))
 
     return int_data, treatment_vars, confounder_vars
 
