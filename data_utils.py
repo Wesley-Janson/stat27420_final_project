@@ -65,6 +65,12 @@ def prep_features(
         print(f'Excluding {temp-len(data)} observations that did not answer confounder questions.')
     elif missing_values != 'retain all':
         data[categorical_vars] = data[categorical_vars].fillna('Missing')  # new class for missing
+    
+    data_treatment_bins = data[data.price_change_amt_next_yr.notnull()]
+    data_treatment_bins = data_treatment_bins["treatment_bins"]
+    
+
+    #data_treatment_bins = data["treatment_bins"]
     data = pd.get_dummies(data, columns=categorical_vars, drop_first=regression)
 
     # prepare treatment and confounder var lists with dummies
@@ -78,8 +84,11 @@ def prep_features(
             if var in dummy:
                 confounder_vars.append(dummy)
 
-    return data[other_vars+confounder_vars+treatment_vars+[
-        "price_change_amt_next_yr","durable_purchase"]], treatment_vars, confounder_vars
+    int_data = data[other_vars+confounder_vars+treatment_vars+[
+        "price_change_amt_next_yr","durable_purchase"]]
+    int_data["treatment_bins"] = data_treatment_bins
+
+    return int_data, treatment_vars, confounder_vars
 
 
 def summarize_predictions(y_train, train_predictions, y_test, test_predictions):
