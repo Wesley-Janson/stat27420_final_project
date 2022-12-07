@@ -34,7 +34,6 @@ def prep_features(
     print(f'Excluding {len(data[data.durable_purchase.isnull()])} observations' +
         " that refused or didn't know durable purchase question.")
     data = data[data.durable_purchase.notnull()]  # require outcome
-    categorical_vars = [var for var in categorical_vars if var != 'durable_purchase']
     if not regression:
         data["durable_purchase"] += 1  # code as {0,1,2} for XGBoost
         data["durable_purchase"] = data["durable_purchase"].astype(int)
@@ -67,13 +66,16 @@ def prep_features(
     elif missing_values != 'retain all':
         data[categorical_vars] = data[categorical_vars].fillna('Missing')  # new class for missing
         
-    data = pd.concat(
-        [pd.get_dummies(data, columns=categorical_vars, drop_first=regression),data["treatment_bins"]],axis=1)
+    data = pd.concat([
+        pd.get_dummies(data, columns=categorical_vars, drop_first=regression),
+        data["treatment_bins"], data[["durable_purchase"]]], 
+        axis=1)
 
     # prepare treatment and confounder var lists with dummies
     print(f'Excluding {len(data[data.price_change_amt_next_yr.isnull()])} observations' +
         ' that did not answer price change amount question.')
     data = data[data.price_change_amt_next_yr.notnull()]  # require treatment
+    outcome_vars = [var for var in data.columns if 'durable_purchase' in var]
     treatment_vars = [var for var in data.columns if 'bins' in var]
     confounder_vars = []
     for var in confounders:
@@ -82,7 +84,7 @@ def prep_features(
                 confounder_vars.append(dummy)
 
     return data[
-        other_vars+confounder_vars+treatment_vars+["price_change_amt_next_yr","durable_purchase"]
+        other_vars+confounder_vars+treatment_vars+outcome_vars+["price_change_amt_next_yr"]
         ].reset_index(), treatment_vars, confounder_vars
 
 
