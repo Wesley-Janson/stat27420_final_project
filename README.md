@@ -9,7 +9,7 @@ This repository contains relevant files for our final project for STAT 27420: In
 
 * **load_data.py**: Python script used to pull data available online, create relevant variables, and merge into main Michigan Survey of Consumers data.
 
-* **parameters.py**:
+* **parameters.py**: Python file denoting variable groups (confounders etc.), variable types (continuous, categorical), used in data cleaning.
 
 * **prepare_survey_data.ipynb**: 
 
