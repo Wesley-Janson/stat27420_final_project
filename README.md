@@ -5,7 +5,7 @@ This repository contains relevant files for our final project for STAT 27420: In
 
 * **STAT_27420_Final_Paper.pdf**: PDF of final paper.
 
-* **models.ipynb**: This is the main Jupyter notebook used to run the models used in our paper.
+* **models.ipynb**: This is the main Jupyter notebook used to run the models used in our paper. This acts as the main driver file, and should be the only file needed to be run.
 
 * **data_utils.py**: Python script that contains helper functions used in data cleaning and analysis.
 
